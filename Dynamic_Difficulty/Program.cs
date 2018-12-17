@@ -8,8 +8,10 @@ namespace Dynamic_Difficulty
 {
     class Program
     {
+        static Controller c = new Controller();
         static void Main(string[] args)
         {
+            c.MainMenu();
         }
     }
 }
