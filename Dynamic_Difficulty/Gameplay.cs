@@ -10,12 +10,9 @@ namespace Dynamic_Difficulty
     {
         private char m_Turn = 'x';
         private bool m_Dynamic = false;
-        public Gameplay(bool dynamic)
-        {
-            m_Dynamic = dynamic;
-        }
+        public Gameplay(bool dynamic) => m_Dynamic = dynamic;
 
-        private void loadBoard()
+        private void LoadBoard()
         {
             //TODO
         }
@@ -28,6 +25,8 @@ namespace Dynamic_Difficulty
         private void TakeTurn()
         {
             //TODO
+            m_Turn = 'o';
+            m_Turn = 'x';
         }
     }
 }
