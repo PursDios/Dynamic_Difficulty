@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Dynamic_Difficulty
 {
-    class Program
+    public class Program
     {
-        static Controller c = new Controller();
+        private static readonly Controller m_C = new Controller();
         static void Main(string[] args)
         {
-            c.MainMenu();
+            m_C.MainMenu();
         }
     }
 }
