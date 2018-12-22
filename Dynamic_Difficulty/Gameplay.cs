@@ -11,7 +11,7 @@ namespace Dynamic_Difficulty
     public class Gameplay
     {
         private Board b;
-        private char m_Turn = 'x';
+        private char m_Turn = 'X';
         private bool m_End = false;
         private bool m_Dynamic = false;
         private int m_Choice;
@@ -27,6 +27,8 @@ namespace Dynamic_Difficulty
             {
                 b.LoadBoard();
                 UserTakeTurn();
+                //because if the user starts it will end on the users turn.
+                CheckWin();
                 if (m_Dynamic)
                     DynamicTakeTurn();
                 else
@@ -89,10 +91,16 @@ namespace Dynamic_Difficulty
             }
 
             //checks for a draw
-            else if (m_Arr[1] != '1' && m_Arr[2] != '2' && m_Arr[3] != '3' && m_Arr[4] != '4' && m_Arr[5] != '5' && m_Arr[6] != '6' && m_Arr[7] != '7' && m_Arr[8] != '8' && m_Arr[9] != '9')
+            else if (m_Arr[0] != '1' && m_Arr[1] != '2' && m_Arr[2] != '3' && m_Arr[3] != '4' && m_Arr[4] != '5' && m_Arr[5] != '6' && m_Arr[6] != '7' && m_Arr[7] != '8' && m_Arr[8] != '9')
             {
                 Console.WriteLine("Draw");
                 m_End = true;
+            }
+
+            if (m_End == true)
+            {
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
             }
         }
 
@@ -132,7 +140,14 @@ namespace Dynamic_Difficulty
 
         protected void ApplyChoice()
         {
-            //TODO
+            m_Arr[m_Choice - 1] = m_Turn;
+
+            if (m_Turn == 'X')
+                m_Turn = 'O';
+            else
+                m_Turn = 'X';
+
+            b.LoadBoard();
         }
     }
 }
