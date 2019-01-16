@@ -46,6 +46,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="GamePlay.cs" />
+    <Compile Include="Minimax.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
