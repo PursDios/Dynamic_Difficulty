@@ -63,6 +63,10 @@ namespace Dynamic_Difficulty
         private char[] m_Arr;
         public char[] getCurrentBoard { get { return m_Arr; } }
 
+        /// <summary>
+        /// The difficulty setting (auto adjusted for dynamic and hard set for static)
+        /// </summary>
+        private int difficulty=0;
 
         /// <summary>
         /// The gameplay loop.
@@ -80,14 +84,16 @@ namespace Dynamic_Difficulty
                 m_Dynamic = dynamic;
                 m_M = new Minimax((char[])m_Arr.Clone(), false);
 
+                if (!m_Dynamic)
+                    SetStaticDifficulty();
                 while (!m_End)
                 {
-                    m_Turn = 'X';
-                    Debug.WriteLine(this.m_Turn);
-                    m_B.LoadBoard();
-                    UserTakeTurn();
-
-                    //because if the user starts it will end on the users turn.
+                    m_B.UpdateBoard(this.m_Arr);
+                    if (!CheckWin())
+                    {
+                        m_Turn = 'X';
+                        UserTakeTurn();
+                    }
                     m_M.UpdateBoard(this.m_Arr);
                     if (!CheckWin())
                     {
@@ -203,17 +209,55 @@ namespace Dynamic_Difficulty
 
         }
 
+        private void SetStaticDifficulty()
+        {
+            if (difficulty == 0)
+            {
+                bool valid = false;
+                int choice = 0;
+                while (valid == false)
+                {
+                    Console.Clear();
+                    m_B.LoadBoard();
+
+                    Console.WriteLine("What difficulty would you like to play at?");
+                    Console.WriteLine("1) Easy\n2) Medium\n3) Hard");
+                    try
+                    {
+                        choice = int.Parse(Console.ReadLine());
+                        difficulty = choice;
+                        valid = true;
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Invalid Entry.\nPlease ensure that you only enter a number.\nPRESS ENTER TO CONTINUE");
+                        Console.ReadLine();
+                    }
+                }
+            }
+
+        }
         /// <summary>
         /// Uses statically assigned values and the minimax algorithum to take a move. 
         /// </summary>
         private void StaticTakeTurn()
         {
-            //int ran = m_R.Next(1, 10);
-
-            //if (ran == 1)
-            //    m_Choice = m_R.Next(0, 8);
-
-            //TODO
+            Minimax max;
+            switch(difficulty)
+            {
+                case 1:
+                    max = m_M.FindNextMove(1);
+                    this.m_Arr = max.MG;
+                    break;
+                case 2:
+                    max = m_M.FindNextMove(4);
+                    this.m_Arr = max.MG;
+                    break;
+                case 3:
+                    max = m_M.FindNextMove(8);
+                    this.m_Arr = max.MG;
+                    break;
+            }
         }
         /// <summary>
         /// Uses dynamic difficulty adjustment and the minimax algorithum to make take a move.
@@ -222,11 +266,7 @@ namespace Dynamic_Difficulty
         {
             //EDIT DEPTH
             Minimax max = m_M.FindNextMove(5);
-
             this.m_Arr = max.MG;
-
-            this.m_B.UpdateBoard(m_Arr);
-
             //TODO
         }
 
