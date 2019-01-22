@@ -118,7 +118,7 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// Checks to see if either the computer or the user has won. 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>true for the game is over, false for the game continues</returns>
         private bool CheckWin()
         {
             //TODO
@@ -208,7 +208,9 @@ namespace Dynamic_Difficulty
             }
 
         }
-
+        /// <summary>
+        /// Sets the difficulty of the static implementation if the user has selected to play a static game.
+        /// </summary>
         private void SetStaticDifficulty()
         {
             if (difficulty == 0)
