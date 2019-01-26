@@ -17,6 +17,10 @@ namespace Dynamic_Difficulty
         /// </summary>
         private Board m_B;
         /// <summary>
+        /// The Randomisation.
+        /// </summary>
+        private Random r;
+        /// <summary>
         /// Minimax object.
         /// </summary>
         private Minimax m_M;
@@ -66,7 +70,17 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// The difficulty setting (auto adjusted for dynamic and hard set for static)
         /// </summary>
-        private int difficulty=0;
+        private int difficulty = 0;
+
+        /// <summary>
+        /// The total number of games won by the user.
+        /// </summary>
+        private int wins;
+
+        /// <summary>
+        /// The total number of games played.
+        /// </summary>
+        private int totalGames;
 
         /// <summary>
         /// The gameplay loop.
@@ -88,12 +102,16 @@ namespace Dynamic_Difficulty
                     SetStaticDifficulty();
                 while (!m_End)
                 {
+                    //Update the board the user can see
                     m_B.UpdateBoard(this.m_Arr);
+                    //Update the board for the Minimax Algo.
+                    m_M.UpdateBoard(this.m_Arr);
                     if (!CheckWin())
                     {
                         m_Turn = 'X';
                         UserTakeTurn();
                     }
+                    m_B.UpdateBoard(this.m_Arr);
                     m_M.UpdateBoard(this.m_Arr);
                     if (!CheckWin())
                     {
@@ -118,7 +136,7 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// Checks to see if either the computer or the user has won. 
         /// </summary>
-        /// <returns>true for the game is over, false for the game continues</returns>
+        /// <returns></returns>
         private bool CheckWin()
         {
             //TODO
@@ -182,8 +200,6 @@ namespace Dynamic_Difficulty
 
             if (m_End == true)
             {
-                Console.WriteLine("Press ENTER to continue...");
-                Console.ReadLine();
                 return true;
             }
 
@@ -209,7 +225,7 @@ namespace Dynamic_Difficulty
 
         }
         /// <summary>
-        /// Sets the difficulty of the static implementation if the user has selected to play a static game.
+        /// Sets the difficulty of the static game.
         /// </summary>
         private void SetStaticDifficulty()
         {
@@ -236,6 +252,10 @@ namespace Dynamic_Difficulty
                         Console.ReadLine();
                     }
                 }
+                if (difficulty == 2)
+                    difficulty = 4;
+                if (difficulty == 3)
+                    difficulty = 8;
             }
 
         }
@@ -244,21 +264,20 @@ namespace Dynamic_Difficulty
         /// </summary>
         private void StaticTakeTurn()
         {
+            if (r == null)
+                r = new Random();
+
+            int ranChance = r.Next(8);
+
             Minimax max;
-            switch(difficulty)
+            if (ranChance < difficulty)
             {
-                case 1:
-                    max = m_M.FindNextMove(1);
-                    this.m_Arr = max.MG;
-                    break;
-                case 2:
-                    max = m_M.FindNextMove(4);
-                    this.m_Arr = max.MG;
-                    break;
-                case 3:
-                    max = m_M.FindNextMove(8);
-                    this.m_Arr = max.MG;
-                    break;
+                max = m_M.FindNextMove(difficulty);
+                this.m_Arr = max.MG;
+            }
+            else
+            {
+                Randomisation();
             }
         }
         /// <summary>
@@ -266,10 +285,52 @@ namespace Dynamic_Difficulty
         /// </summary>
         private void DynamicTakeTurn()
         {
-            //EDIT DEPTH
-            Minimax max = m_M.FindNextMove(5);
-            this.m_Arr = max.MG;
-            //TODO
+            difficulty = 5;
+            r = new Random();
+
+
+            int loses = totalGames - wins;
+            if (loses > wins)
+            {
+                int differece = loses - wins;
+                difficulty = 5 - differece;
+                if (difficulty < 1)
+                    difficulty = 1;
+            }
+            else if (wins > loses)
+            {
+                int difference = wins - loses;
+                difficulty = 5 + wins;
+                if (difficulty > 8)
+                    difficulty = 8;
+            }
+            else
+                difficulty = 5;
+
+            int ranChance = 8 - difficulty;
+            ranChance = r.Next(ranChance);
+
+            if (ranChance < difficulty)
+            {
+                Minimax max = m_M.FindNextMove(difficulty);
+                this.m_Arr = max.MG;
+            }
+            else
+                Randomisation();
+        }
+        /// <summary>
+        /// Randomly generates a number and uses that as the AI's move.
+        /// </summary>
+        private void Randomisation()
+        {
+            int i;
+            r = new Random();
+            do
+            {
+                i = r.Next(1, 10);
+                m_Choice = i;
+            } while (!CheckChoice());
+            ApplyChoice();
         }
 
         /// <summary>
