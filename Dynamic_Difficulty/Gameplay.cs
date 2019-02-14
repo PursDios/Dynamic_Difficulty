@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -12,6 +13,10 @@ namespace Dynamic_Difficulty
 {
     public class Gameplay
     {
+        private Thread ted;
+        public Thread getTed { get { return ted; } }
+
+        private BoardForm bf;
         /// <summary>
         /// The board.
         /// </summary>
@@ -60,12 +65,13 @@ namespace Dynamic_Difficulty
         /// The choice the user made.
         /// </summary>
         private int m_Choice;
+        public int getChoice { get { return m_Choice; } set { m_Choice = value; } }
 
         /// <summary>
         /// The board array.
         /// </summary>
         private char[] m_Arr;
-        public char[] getCurrentBoard { get { return m_Arr; } }
+        public char[] getCurrentBoard { get { return m_Arr; } set { m_Arr = value; } }
 
         /// <summary>
         /// The difficulty setting (auto adjusted for dynamic and hard set for static)
@@ -82,12 +88,36 @@ namespace Dynamic_Difficulty
         /// </summary>
         private int totalGames;
 
+        private static Gameplay g;
+
+        private Gameplay()
+        {
+
+        }
+
+        public static Gameplay getInstance()
+        {
+            if (g == null)
+            {
+                g = new Gameplay();
+            }
+            return g;
+        }
+
+
+
         /// <summary>
         /// The gameplay loop.
         /// </summary>
         /// <param name="dynamic"></param>
-        public void StartGame(bool dynamic)
+        public void StartGame(bool dynamic, bool UI)
         {
+            if (UI)
+            {
+                ted = new Thread(LoadUI);
+                ted.Start();
+            }
+
             bool replay = true;
             char input = 'N';
             do
@@ -102,8 +132,10 @@ namespace Dynamic_Difficulty
                     SetStaticDifficulty();
                 while (!m_End)
                 {
-                    //Update the board the user can see
+                    //Update the boards the user can see
                     m_B.UpdateBoard(this.m_Arr);
+                    if(bf != null)
+                        bf.UpdateBoard();
                     //Update the board for the Minimax Algo.
                     m_M.UpdateBoard(this.m_Arr);
                     if (!CheckWin())
@@ -112,6 +144,8 @@ namespace Dynamic_Difficulty
                         UserTakeTurn();
                     }
                     m_B.UpdateBoard(this.m_Arr);
+                    if(bf != null)
+                        bf.UpdateBoard();
                     m_M.UpdateBoard(this.m_Arr);
                     if (!CheckWin())
                     {
@@ -133,6 +167,13 @@ namespace Dynamic_Difficulty
 
             } while (replay != false);
         }
+
+        private void LoadUI()
+        {
+            bf = new BoardForm();
+            bf.ShowDialog();
+        }
+
         /// <summary>
         /// Checks to see if either the computer or the user has won. 
         /// </summary>
@@ -348,7 +389,7 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// Applies the choice to the board.
         /// </summary>
-        protected void ApplyChoice()
+        public void ApplyChoice()
         {
             m_Arr[m_Choice - 1] = m_Turn;
 
