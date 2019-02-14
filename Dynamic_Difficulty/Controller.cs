@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dynamic_Difficulty
+namespace Dynamic_Difficulty 
 {
     public class Controller
     {
+        private Controller c;
         private int m_Choice;
-        private bool m_Successful;
-        private readonly Gameplay g = new Gameplay();
+        private bool m_Successful=false, UI;
 
+        public Controller()
+        {
 
+        }
 
         public void MainMenu()
         {
@@ -30,16 +33,44 @@ namespace Dynamic_Difficulty
             switch (m_Choice)
             {
                 case 1:
-                    g.StartGame(false);
+                    m_Successful = false;
+                    UIConsoleChoice();
+                    Gameplay.getInstance().StartGame(false, UI);
                     break;
                 case 2:
-                    g.StartGame(true);
+                    m_Successful = false;
+                    UIConsoleChoice();
+                    Gameplay.getInstance().StartGame(true, UI);
                     break;
                 default:
                     Console.WriteLine("Invalid Selection Please Try Again");
                     Console.ReadLine();
                     break;
             }
+        }
+        private void UIConsoleChoice()
+        {
+            while (m_Successful != true)
+            {
+                Console.Clear();
+                Console.WriteLine("UI or Console?");
+                Console.WriteLine("1) UI");
+                Console.WriteLine("2) Console");
+                m_Successful = int.TryParse(Console.ReadLine(), out m_Choice);
+
+                switch(m_Choice)
+                {
+                    case 1:
+                        UI = true;
+                        break;
+                    case 2:
+                        UI = false;
+                        break;
+                }
+            }
+
+            m_Successful = false;
+            m_Choice = 0;
         }
     }
 }

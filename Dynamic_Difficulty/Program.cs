@@ -8,11 +8,11 @@ namespace Dynamic_Difficulty
 {
     public class Program
     {
-
-        private static readonly Controller m_C = new Controller();
+        private static Controller c;
         static void Main(string[] args)
         {
-            m_C.MainMenu();
+            c = new Controller();
+            c.MainMenu();
         }
     }
 }
