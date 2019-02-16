@@ -12,7 +12,6 @@ namespace Dynamic_Difficulty
 {
     public partial class BoardForm : Form
     {
-        private bool valid=false;
         private List<PictureBox> pictureBoxList;
         private delegate void InvokeDelegate();
 
@@ -20,7 +19,11 @@ namespace Dynamic_Difficulty
         {
             InitializeComponent();
             pictureBoxList = new List<PictureBox>();
+            AddPictureBoxes();
+        }
 
+        private void AddPictureBoxes()
+        {
             pictureBoxList.Add(pictureBox1);
             pictureBoxList.Add(pictureBox2);
             pictureBoxList.Add(pictureBox3);
@@ -35,59 +38,72 @@ namespace Dynamic_Difficulty
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            Gameplay.getInstance().getChoice = 1;
-            valid = Gameplay.getInstance().CheckChoice();
-            if (!valid)
-                MessageBox.Show("Invalid Selection. This spot is already taken.");
-            else
-            {
-                Gameplay.getInstance().ApplyChoice();
-
-                if (Gameplay.getInstance().isTurnX)
-                    pictureBox1.ImageLocation = "X.png";
-                else
-                    pictureBox1.ImageLocation = "O.png";
-            }
+            ApplyChoice(1);
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(2);
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(3);
         }
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(4);
         }
 
         private void pictureBox5_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(5);
         }
 
         private void pictureBox6_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(6);
         }
 
         private void pictureBox7_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(7);
         }
 
         private void pictureBox8_Click(object sender, EventArgs e)
         {
-
+            ApplyChoice(8);
         }
 
         private void pictureBox9_Click(object sender, EventArgs e)
         {
+            ApplyChoice(9);
+        }
 
+        private void ApplyChoice(int i)
+        {
+            if (Gameplay.getInstance().isTurnX)
+            {
+                if (!Gameplay.getInstance().CheckWin())
+                {
+                    Gameplay.getInstance().UserTakeTurn(i);
+                    Gameplay.getInstance().Update();
+                    Console.WriteLine("Where would you like to go (1-9)");
+                }
+                else
+                    Console.WriteLine("Game Finished! PRESS ENTER");
+            }
+            if (!Gameplay.getInstance().isTurnX)
+            {
+                if (!Gameplay.getInstance().CheckWin())
+                {
+                    Gameplay.getInstance().StaticTakeTurn();
+                    Gameplay.getInstance().Update();
+                }
+                else
+                    Console.WriteLine("Game Finished! PRESS ENTER");
+            }
         }
 
         public void UpdateBoard()
@@ -109,10 +125,10 @@ namespace Dynamic_Difficulty
                         switch(Gameplay.getInstance().getCurrentBoard[i])
                         {
                             case 'X':
-                                pictureBoxList[i].ImageLocation = "X.png";
+                                pictureBoxList[i].ImageLocation = "x.jpeg";
                                 break;
                             case 'O':
-                                pictureBoxList[i].ImageLocation = "O.png";
+                                pictureBoxList[i].ImageLocation = "o.jpeg";
                                 break;
                         }
                     }

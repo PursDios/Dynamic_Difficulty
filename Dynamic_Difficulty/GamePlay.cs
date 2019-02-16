@@ -38,9 +38,10 @@ namespace Dynamic_Difficulty
         {
             get
             {
-                if (m_Turn == 'O')
+                if (m_Turn == 'X')
                     return true;
-                return false;
+                else
+                    return false;
             }
             set
             {
@@ -60,6 +61,7 @@ namespace Dynamic_Difficulty
         /// Is dynamic boolean.
         /// </summary>
         private bool m_Dynamic = false;
+        public bool getDynamic { get { return m_Dynamic; } }
 
         /// <summary>
         /// The choice the user made.
@@ -76,7 +78,9 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// The difficulty setting (auto adjusted for dynamic and hard set for static)
         /// </summary>
-        private int difficulty = 0;
+        private int m_Difficulty;
+
+        private bool EndGameCalled = false;
 
         /// <summary>
         /// The total number of games won by the user.
@@ -87,6 +91,8 @@ namespace Dynamic_Difficulty
         /// The total number of games played.
         /// </summary>
         private int totalGames;
+
+        bool replay = false;
 
         private static Gameplay g;
 
@@ -107,65 +113,55 @@ namespace Dynamic_Difficulty
 
 
         /// <summary>
-        /// The gameplay loop.
+        /// Assigns the starting inital values for the game and calls the gameplay loop
         /// </summary>
-        /// <param name="dynamic"></param>
-        public void StartGame(bool dynamic, bool UI)
+        /// <param name="dynamic">true or false, dynamic or static</param>
+        /// <param name="difficulty">The static difficulty value if applicable else 99</param>
+        /// <param name="UI">Display UI? True/False</param>
+        public void StartGame(bool dynamic, int difficulty, bool UI)
         {
-            if (UI)
-            {
-                ted = new Thread(LoadUI);
-                ted.Start();
-            }
+            m_End = false;
+            m_Turn = 'X';
+            m_Arr = new char[] { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+            m_B = new Board();
+            m_M = new Minimax((char[])m_Arr.Clone(), false);
+            m_Dynamic = dynamic;
 
-            bool replay = true;
-            char input = 'N';
-            do
-            {
-                m_End = false;
-                m_Arr = new char[] { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-                m_B = new Board(m_Arr);
-                m_Dynamic = dynamic;
-                m_M = new Minimax((char[])m_Arr.Clone(), false);
+            if (difficulty != 99)
+                m_Difficulty = difficulty;
 
-                if (!m_Dynamic)
-                    SetStaticDifficulty();
-                while (!m_End)
+            if(UI)
+            {
+                if (ted == null || !ted.IsAlive)
                 {
-                    //Update the boards the user can see
-                    m_B.UpdateBoard(this.m_Arr);
-                    if(bf != null)
-                        bf.UpdateBoard();
-                    //Update the board for the Minimax Algo.
-                    m_M.UpdateBoard(this.m_Arr);
+                    ted = new Thread(LoadUI);
+                    ted.Start();
+                }
+            }
+            GameplayLoop();
+        }
+
+        private void GameplayLoop()
+        {
+            m_B.UpdateCurrentBoard();
+            while (!m_End)
+            {
+                if (!CheckWin())
+                {
+                    if (isTurnX)
+                        UserChooseMove();
                     if (!CheckWin())
                     {
-                        m_Turn = 'X';
-                        UserTakeTurn();
-                    }
-                    m_B.UpdateBoard(this.m_Arr);
-                    if(bf != null)
-                        bf.UpdateBoard();
-                    m_M.UpdateBoard(this.m_Arr);
-                    if (!CheckWin())
-                    {
-                        m_Turn = 'O';
-                        if (m_Dynamic)
+                        if (!isTurnX && m_Dynamic)
                             DynamicTakeTurn();
                         else
                             StaticTakeTurn();
-                        this.CheckWin();
                     }
                 }
+            }
 
-                Console.WriteLine("Do you wish to play again? Y/N");
-                char.TryParse(Console.ReadLine(), out input);
-                if (input == 'Y' || input == 'y')
-                    replay = true;
-                else
-                    replay = false;
-
-            } while (replay != false);
+            
+            EndGame();
         }
 
         private void LoadUI()
@@ -178,132 +174,121 @@ namespace Dynamic_Difficulty
         /// Checks to see if either the computer or the user has won. 
         /// </summary>
         /// <returns></returns>
-        private bool CheckWin()
+        public bool CheckWin()
         {
             //TODO
             //top left to top right
             if (m_Arr[0] == m_Arr[1] && m_Arr[1] == m_Arr[2])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[0]);
                 m_End = true;
             }
             //middle left to middle right
             else if (m_Arr[3] == m_Arr[4] && m_Arr[4] == m_Arr[5])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[3]);
                 m_End = true;
             }
             //bottom left to bottom right
             else if (m_Arr[6] == m_Arr[7] && m_Arr[7] == m_Arr[8])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[6]);
                 m_End = true;
             }
 
             //top left to bottom right
             else if (m_Arr[0] == m_Arr[4] && m_Arr[4] == m_Arr[8])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[0]);
                 m_End = true;
             }
             //top right to bottom left
             else if (m_Arr[2] == m_Arr[4] && m_Arr[6] == m_Arr[4])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[2]);
                 m_End = true;
             }
 
             //top left to bottom left
             else if (m_Arr[0] == m_Arr[3] && m_Arr[3] == m_Arr[6])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[0]);
                 m_End = true;
             }
             //top middle to bottom middle
             else if (m_Arr[1] == m_Arr[4] && m_Arr[4] == m_Arr[7])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[1]);
                 m_End = true;
             }
             //top right to bottom right
             else if (m_Arr[2] == m_Arr[5] && m_Arr[5] == m_Arr[8])
             {
-                Console.WriteLine("{0}'s wins!", m_Arr[2]);
                 m_End = true;
             }
 
             // checks for a draw
             else if (m_Arr[0] != '1' && m_Arr[1] != '2' && m_Arr[2] != '3' && m_Arr[3] != '4' && m_Arr[4] != '5' && m_Arr[5] != '6' && m_Arr[6] != '7' && m_Arr[7] != '8' && m_Arr[8] != '9')
             {
-                Console.WriteLine("Draw");
                 m_End = true;
             }
 
             if (m_End == true)
             {
+                if (ted != null)
+                    if (ted.IsAlive)
+                    {
+                        bf.Hide();
+                    }
                 return true;
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Queries the user for their move, checks it's valid and applies it to the board.
-        /// </summary>
-        private void UserTakeTurn()
+        private void EndGame()
+        {
+            if (m_Arr[0] != '1' && m_Arr[1] != '2' && m_Arr[2] != '3' && m_Arr[3] != '4' && m_Arr[4] != '5' && m_Arr[5] != '6' && m_Arr[6] != '7' && m_Arr[7] != '8' && m_Arr[8] != '9')
+                Console.WriteLine("Draw!");
+            else
+            {
+                if (isTurnX)
+                    Console.WriteLine("O's Win!");
+                else
+                    Console.WriteLine("X's Win!");
+            }
+            Console.WriteLine("PRESS ENTER TO CONTINUE");
+            Console.ReadLine();
+        }
+
+        private void UserChooseMove()
         {
             //TODO
             m_Choice = -1;
-            Console.WriteLine("Where would you like to go (1-9)");
-            int.TryParse(Console.ReadLine(), out m_Choice);
-            if (m_Choice != -1)
+            do
             {
-                if (CheckChoice())
-                {
-                    ApplyChoice();
-                }
-            }
-
+                Console.Clear();
+                m_B.UpdateCurrentBoard();
+                Console.WriteLine("Where would you like to go (1-9)");
+                int.TryParse(Console.ReadLine(), out m_Choice);
+            } while (m_Choice == -1);
+            UserTakeTurn(m_Choice);
         }
-        /// <summary>
-        /// Sets the difficulty of the static game.
-        /// </summary>
-        private void SetStaticDifficulty()
-        {
-            if (difficulty == 0)
-            {
-                bool valid = false;
-                int choice = 0;
-                while (valid == false)
-                {
-                    Console.Clear();
-                    m_B.LoadBoard();
 
-                    Console.WriteLine("What difficulty would you like to play at?");
-                    Console.WriteLine("1) Easy\n2) Medium\n3) Hard");
-                    try
+        /// <summary>
+        /// Queries the user for their move, checks it's valid and applies it to the board.
+        /// </summary>
+        public void UserTakeTurn(int choice)
+        {
+            m_Choice = choice;
+            if (!CheckWin())
+            {
+                if (m_Choice != -1)
+                {
+                    if (CheckChoice())
                     {
-                        choice = int.Parse(Console.ReadLine());
-                        difficulty = choice;
-                        valid = true;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Invalid Entry.\nPlease ensure that you only enter a number.\nPRESS ENTER TO CONTINUE");
-                        Console.ReadLine();
+                        ApplyChoice();
                     }
                 }
-                if (difficulty == 2)
-                    difficulty = 4;
-                if (difficulty == 3)
-                    difficulty = 8;
             }
-
         }
         /// <summary>
         /// Uses statically assigned values and the minimax algorithum to take a move. 
         /// </summary>
-        private void StaticTakeTurn()
+        public void StaticTakeTurn()
         {
             if (r == null)
                 r = new Random();
@@ -311,10 +296,12 @@ namespace Dynamic_Difficulty
             int ranChance = r.Next(8);
 
             Minimax max;
-            if (ranChance < difficulty)
+            if (ranChance < m_Difficulty)
             {
-                max = m_M.FindNextMove(difficulty);
+                m_M.UpdateBoard(this.m_Arr);
+                max = m_M.FindNextMove(m_Difficulty);
                 this.m_Arr = max.MG;
+                m_Turn = 'X';
             }
             else
             {
@@ -324,9 +311,9 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// Uses dynamic difficulty adjustment and the minimax algorithum to make take a move.
         /// </summary>
-        private void DynamicTakeTurn()
+        public void DynamicTakeTurn()
         {
-            difficulty = 5;
+            m_Difficulty = 5;
             r = new Random();
 
 
@@ -334,27 +321,29 @@ namespace Dynamic_Difficulty
             if (loses > wins)
             {
                 int differece = loses - wins;
-                difficulty = 5 - differece;
-                if (difficulty < 1)
-                    difficulty = 1;
+                m_Difficulty = 5 - differece;
+                if (m_Difficulty < 1)
+                    m_Difficulty = 1;
             }
             else if (wins > loses)
             {
                 int difference = wins - loses;
-                difficulty = 5 + wins;
-                if (difficulty > 8)
-                    difficulty = 8;
+                m_Difficulty = 5 + wins;
+                if (m_Difficulty > 8)
+                    m_Difficulty = 8;
             }
             else
-                difficulty = 5;
+                m_Difficulty = 5;
 
-            int ranChance = 8 - difficulty;
+            int ranChance = 8 - m_Difficulty;
             ranChance = r.Next(ranChance);
 
-            if (ranChance < difficulty)
+            if (ranChance < m_Difficulty)
             {
-                Minimax max = m_M.FindNextMove(difficulty);
+                m_M.UpdateBoard(this.m_Arr);
+                Minimax max = m_M.FindNextMove(m_Difficulty);
                 this.m_Arr = max.MG;
+                m_Turn = 'X';
             }
             else
                 Randomisation();
@@ -398,7 +387,21 @@ namespace Dynamic_Difficulty
             else
                 m_Turn = 'X';
 
-            m_B.LoadBoard();
+            m_B.UpdateCurrentBoard();
+            if (ted != null)
+            {
+                if (ted.IsAlive)
+                    bf.UpdateBoard();
+            }
+        }
+        public void Update()
+        {
+            m_B.UpdateCurrentBoard();
+            m_M.UpdateBoard(this.m_Arr);
+
+            if (ted != null)
+                if (ted.IsAlive)
+                    bf.UpdateBoard();
         }
     }
 }
