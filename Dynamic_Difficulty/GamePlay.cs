@@ -85,14 +85,12 @@ namespace Dynamic_Difficulty
         /// <summary>
         /// The total number of games won by the user.
         /// </summary>
-        private int wins;
+        private int wins=0, winStreak;
 
         /// <summary>
         /// The total number of games played.
         /// </summary>
-        private int totalGames;
-
-        bool replay = false;
+        private int totalGames=0;
 
         private static Gameplay g;
 
@@ -246,9 +244,17 @@ namespace Dynamic_Difficulty
             else
             {
                 if (isTurnX)
+                {
                     Console.WriteLine("O's Win!");
+                    winStreak = 0;
+                }
                 else
+                {
                     Console.WriteLine("X's Win!");
+                    winStreak++;
+                    wins++;
+                }
+                totalGames++;
             }
             Console.WriteLine("PRESS ENTER TO CONTINUE");
             Console.ReadLine();
@@ -329,11 +335,19 @@ namespace Dynamic_Difficulty
             {
                 int difference = wins - loses;
                 m_Difficulty = 5 + wins;
+                if (winStreak > 3)
+                    m_Difficulty++;
+
                 if (m_Difficulty > 8)
                     m_Difficulty = 8;
             }
             else
+            {
+                if(winStreak > 3)
+                    m_Difficulty = 6;
+                else
                 m_Difficulty = 5;
+            }
 
             int ranChance = 8 - m_Difficulty;
             ranChance = r.Next(ranChance);
