@@ -98,7 +98,10 @@ namespace Dynamic_Difficulty
             {
                 if (!Gameplay.getInstance().CheckWin())
                 {
-                    Gameplay.getInstance().StaticTakeTurn();
+                    if (!Gameplay.getInstance().getDynamic)
+                        Gameplay.getInstance().DynamicTakeTurn();
+                    else
+                        Gameplay.getInstance().StaticTakeTurn();
                     Gameplay.getInstance().Update();
                 }
                 else
